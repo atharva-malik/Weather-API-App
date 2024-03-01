@@ -1,3 +1,2 @@
-flask
 requests
-email-validator
+iso3166

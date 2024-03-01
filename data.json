@@ -1,0 +1,18 @@
+{"coord": {"lon": 151.35, "lat": -33.4333}, 
+"weather": [{"id": 804, "main": "Clouds", "description": "overcast clouds", "icon": "04d"}], 
+"base": "stations", 
+"main": {"temp": 25.4, "feels_like": 26.08, "temp_min": 23.17, "temp_max": 26.62, "pressure": 1014, "humidity": 80}, 
+"visibility": 10000, 
+"wind": {"speed": 0.45, "deg": 128, "gust": 2.68}, 
+"clouds": {"all": 92}, "dt": 1709249060, 
+"sys": {
+    "type": 2,
+    "id": 2012707, 
+    "country": "AU", 
+    "sunrise": 1709235777, 
+    "sunset": 1709281880
+}, 
+"timezone": 39600, 
+"id": 2164849, 
+"name": "Gosford", 
+"cod": 200}
