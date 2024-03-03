@@ -1,2 +1,6 @@
 requests
 iso3166
+keyboard
+simple_colors
+datetime
+pytz
