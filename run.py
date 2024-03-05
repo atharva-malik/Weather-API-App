@@ -1,6 +1,4 @@
-import requests, keyboard, time, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
-
-from pprint import pprint
+import requests, time, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
 
 #region
 api_key = "ede8ff9e889a72caabf0bcec094eb623"
@@ -8,13 +6,12 @@ api_key = "ede8ff9e889a72caabf0bcec094eb623"
 
 
 def clear():
-  # # for windows
-  # if name == 'nt':
-  #   _ = system('cls')
-  # # for mac and linux(here, os.name is 'posix')
-  # else:
-  #   _ = system('clear')
-  pass
+  # for windows
+  if name == 'nt':
+    _ = system('cls')
+  # for mac and linux(here, os.name is 'posix')
+  else:
+    _ = system('clear')
 
 
 def deg_to_compass(degrees):
@@ -66,7 +63,8 @@ def get_future_forecast(city: str, days: int, more=False) -> int:
     while j < days*4:
         i = data['list'][j]
         date = i['dt_txt'][:10]
-        if date in forecast: j += 1;
+        print(i, date)
+        if date in forecast: j += 1
         else:
           forecast.append(date)
           temp = i['main']['temp']
@@ -86,16 +84,14 @@ def get_future_forecast(city: str, days: int, more=False) -> int:
             print(f"\n\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C\nFeels Like: {feels_like}°C")
             print(f"\n\nWeather condition is {weather_main}, {description}.")
             print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}")
-            print("\n\nPress [N] to go to the next date or [B] to go to the previous date.")
             while True:
-              if keyboard.is_pressed("n"):
-                keyboard.press("backspace")
+              text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date.")
+              if text.lower() == "n":
                 time.sleep(0.5)
                 clear()
                 j += 1
                 break
-              elif keyboard.is_pressed("b"):
-                keyboard.press("backspace")
+              elif text.lower() == "b":
                 time.sleep(0.5)
                 clear()
                 j -= 1
@@ -130,7 +126,7 @@ def get_weather(city: str, more=False) -> int:
     humidity = data['main']['humidity']
     visibility = data['visibility']
     wind_speed = data['wind']['speed']
-    wind_direction = deg_to_compass(data['wind']['deg'])  #TODO: Convert to North East South West
+    wind_direction = deg_to_compass(data['wind']['deg'])
     sunset = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
     sunsrise = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
     if not more:
@@ -154,39 +150,30 @@ def get_weather(city: str, more=False) -> int:
 
 
 def main():
-  print(yellow("Press the required key. Press [H] for help"))
   while True:
-    if keyboard.is_pressed("H"):
+    text = input(yellow("Enter the required key. Enter [H] for help: "))
+    if text.lower() == "h":
       clear()
       print(green("Press [C] to check weather for a city.\nPress [W] to get a 5 day forecast for a city.\nPress [H] for help\nPress [E] to quit."))
-      keyboard.press("backspace")
-      time.sleep(0.5)
-    elif keyboard.is_pressed("e"):
+    elif text.lower() == "e":
       clear()
-      keyboard.press("backspace")
       break
-    elif keyboard.is_pressed("C"):
+    elif text.lower() == "c":
       clear()
-      keyboard.press("backspace")
       city = input("City Name: ")
       err = get_weather(city=city)
       if err > 0:
-        print(yellow("Press [M] for more information or [H] to go to Home."))
+        text = input(yellow("Enter [M] for more information or [H] to go to Home."))
         while True:
-          if keyboard.is_pressed("m"):
-            keyboard.press("backspace")
+          if text.lower() == "m":
             clear()
             get_weather(city=city, more=True)
-            print(yellow("Press [H] to go to Home."))
-          elif keyboard.is_pressed("h"):
-            keyboard.press("backspace")
+            print(yellow("Enter [H] to go to Home."))
+          elif text.lower() == "h":
             clear()
-            time.sleep(0.5)
             break
-      print(yellow("Press the required key. Press [H] for help"))
-    elif keyboard.is_pressed("w"):
+    elif text.lower() == "w":
       clear()
-      keyboard.press("backspace")
       city = input("City Name: ")
       try:
         days = int(input("Number of days to forecast: "))
@@ -197,19 +184,17 @@ def main():
           print(red("Resorting to the minimum (1 day)."))
           days = 1
       except Exception:
-        print(red("Invalid input! Resorting to the default (5 days)."))
-        days = 5
+        print(red("Invalid input! Resorting to the default (6 days)."))
+        days = 6
       err = get_future_forecast(city=city, days=days)
       if err > 0:
-        print(yellow("Press [M] for more information or [H] to go to Home."))
+        text = input(yellow("Press [M] for more information or [H] to go to Home."))
         while True:
-          if keyboard.is_pressed("m"):
-            keyboard.press("backspace")
+          if text.lower() == "m":
             clear()
             get_future_forecast(city=city, days=days, more=True)
             break
-          elif keyboard.is_pressed("h"):
-            keyboard.press("backspace")
+          elif text.lower() == "h":
             clear()
             time.sleep(0.5)
             break
