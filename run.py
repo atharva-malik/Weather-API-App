@@ -27,8 +27,8 @@ def deg_to_compass(degrees):
     raise ValueError("Input degrees must be between 0 and 360")
 
   # Map degrees to compass directions using a lookup table
-  directions = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"]
+  directions = ["North", "North North East", "North East", "East North East", "East", "East South East", "South East", "South South East",
+                "South", "South South West", "South West", "West South West", "West", "West North West", "North West", "North North West"]
   index = int((degrees / 22.5) + 0.5) % 16
   return directions[index]
 
