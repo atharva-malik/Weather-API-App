@@ -50,53 +50,59 @@ def unix_time_to_datetime(unix_time, timezone=None):
     return datetime.fromtimestamp(unix_time)
 
 
+def clean_data(data):
+  forecast = []
+  data_output = []
+  for i in data['list']:
+      date = i['dt_txt'][:10]
+      if date not in forecast:
+        forecast.append(date)
+        data_output.append({})
+        data_output[-1]["date"] = date
+        data_output[-1]["temp"] = i['main']['temp']
+        data_output[-1]["description"] = i['weather'][0]['description'].capitalize()
+        
+        data_output[-1]["weather_main"] = i['weather'][0]['main']
+        data_output[-1]["feels_like"] = i['main']['feels_like']
+        data_output[-1]["temp_min"] = i['main']['temp_min']
+        data_output[-1]["temp_max"] = i['main']['temp_max']
+        data_output[-1]["pressure"] = i['main']['pressure']
+        data_output[-1]["humidity"] = i['main']['humidity']
+  return data_output
+
 def get_future_forecast(city: str, days: int, more=False) -> int:
   url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
   response = requests.get(url)
   if 299 >= response.status_code >= 200:
-    forecast = []
     data = response.json()
-    #pprint(data)
+    n_data = clean_data(data)
     if not more: print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}:")
-    else: print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
-    j = 0
-    while j < days*4:
-        i = data['list'][j]
-        date = i['dt_txt'][:10]
-        print(i, date)
-        if date in forecast: j += 1
-        else:
-          forecast.append(date)
-          temp = i['main']['temp']
-          description = i['weather'][0]['description'].capitalize()
-          
-          if not more:
-            print(f"Forecast for {date}: {temp}°C, {description}\n")
-            j += 1
-          else:
-            weather_main = i['weather'][0]['main']
-            feels_like = i['main']['feels_like']
-            temp_min = i['main']['temp_min']
-            temp_max = i['main']['temp_max']
-            pressure = i['main']['pressure']
-            humidity = i['main']['humidity']
-            print(f"Forecast for {date}:")
-            print(f"\n\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C\nFeels Like: {feels_like}°C")
-            print(f"\n\nWeather condition is {weather_main}, {description}.")
-            print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}")
-            while True:
-              text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date.")
-              if text.lower() == "n":
-                time.sleep(0.5)
-                clear()
-                j += 1
-                break
-              elif text.lower() == "b":
-                time.sleep(0.5)
-                clear()
-                j -= 1
-                break
-            
+    else: 
+      print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
+      j = 0
+      while True:
+        print(f"Forecast for {(n_data[j]['date'])}:")
+        print(f"\n\nMax Temperature: {(n_data[j]['temp_max'])}°C\nMin Temperature: {(n_data[j]['temp_min'])}°C\nFeels Like: {n_data[j]['feels_like']}°C")
+        print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
+        print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
+        while True:
+          text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date: ")
+          if text.lower() == "n":
+            time.sleep(0.5)
+            clear()
+            if j == days-1:
+              j = 0
+            else:
+              j += 1
+            break
+          elif text.lower() == "b":
+            time.sleep(0.5)
+            clear()
+            if j == 0:
+              j = days-1
+            else:
+              j -= 1
+            break
     return 1
   elif 599 >= response.status_code >= 500:
     print("Error: Server is malfunctioning!")
@@ -178,17 +184,17 @@ def main():
       try:
         days = int(input("Number of days to forecast: "))
         if days > 5:
-          print(red("Resorting to the maximum (5 days)."))
-          days = 10
+          print(red("Resorting to the maximum (6 days)."))
+          days = 6
         elif days < 1:
           print(red("Resorting to the minimum (1 day)."))
           days = 1
       except Exception:
-        print(red("Invalid input! Resorting to the default (6 days)."))
-        days = 6
+        print(red("Invalid input! Resorting to the default (5 days)."))
+        days = 5
       err = get_future_forecast(city=city, days=days)
       if err > 0:
-        text = input(yellow("Press [M] for more information or [H] to go to Home."))
+        text = input(yellow("Press [M] for more information or [H] to go to Home: "))
         while True:
           if text.lower() == "m":
             clear()
@@ -198,7 +204,6 @@ def main():
             clear()
             time.sleep(0.5)
             break
-      print(yellow("Press the required key. Press [H] for help"))
 
 if __name__ == "__main__":
   print(yellow("Welcome to Weather API!", ["bold", "underlined"]))
