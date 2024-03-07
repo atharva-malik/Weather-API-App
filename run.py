@@ -5,6 +5,10 @@ api_key = "ede8ff9e889a72caabf0bcec094eb623"
 #endregion
 
 
+def save_to_history(query: str, data: dict):
+  pass
+
+
 def clear():
   # for windows
   if name == 'nt':
@@ -70,39 +74,42 @@ def clean_data(data):
         data_output[-1]["humidity"] = i['main']['humidity']
   return data_output
 
-def get_future_forecast(city: str, days: int, more=False) -> int:
+
+def get_future_forecast(city: str, more=False) -> int:
   url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
   response = requests.get(url)
   if 299 >= response.status_code >= 200:
     data = response.json()
     n_data = clean_data(data)
-    if not more: print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}:")
+    if not more: print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}: {n_data[0]['temp']}°C, {n_data[0]['description']}"); return 1
     else: 
       print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
       j = 0
       while True:
-        print(f"Forecast for {(n_data[j]['date'])}:")
-        print(f"\n\nMax Temperature: {(n_data[j]['temp_max'])}°C\nMin Temperature: {(n_data[j]['temp_min'])}°C\nFeels Like: {n_data[j]['feels_like']}°C")
+        if j < 0:
+          break
+        print(f"Forecast for {n_data[j]['date']}:")
+        print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
         print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
         print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
-        while True:
-          text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date: ")
-          if text.lower() == "n":
-            time.sleep(0.5)
-            clear()
-            if j == days-1:
-              j = 0
-            else:
-              j += 1
-            break
-          elif text.lower() == "b":
-            time.sleep(0.5)
-            clear()
-            if j == 0:
-              j = days-1
-            else:
-              j -= 1
-            break
+        text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: ")
+        if text.lower() == "n":
+          time.sleep(0.5)
+          clear()
+          if j == len(n_data) - 1:
+            j = 0
+          else:
+            j += 1
+        elif text.lower() == "b":
+          time.sleep(0.5)
+          clear()
+          if j == 0:
+            j = len(n_data) - 1
+          else:
+            j -= 1
+        else:
+          j = -1
+          return 1
     return 1
   elif 599 >= response.status_code >= 500:
     print("Error: Server is malfunctioning!")
@@ -114,53 +121,57 @@ def get_future_forecast(city: str, days: int, more=False) -> int:
   return -1
 
 
-def get_weather(city: str, more=False) -> int: 
-  url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-  response = requests.get(url)
-  if 299 >= response.status_code >= 200:
-    data = response.json()
-    city = data['name']
-    country = data['sys']['country']
-    temp = data['main']['temp']
-    description = data['weather'][0]['description'].capitalize()
-
-    weather_main = data['weather'][0]['main']
-    feels_like = data['main']['feels_like']
-    temp_min = data['main']['temp_min']
-    temp_max = data['main']['temp_max']
-    pressure = data['main']['pressure']
-    humidity = data['main']['humidity']
-    visibility = data['visibility']
-    wind_speed = data['wind']['speed']
-    wind_direction = deg_to_compass(data['wind']['deg'])
-    sunset = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
-    sunsrise = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
-    if not more:
-      print(f"Weather in {city}, {countries.get(country).name}: {temp}°C, {description}")
-      return 1
-    print(f"Advanced Weather in {city}, {countries.get(country).name}:")
-    print(f"\n\nCurrent Temperature: {temp}°C\nFeels Like: {feels_like}°C\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C")
-    print(f"\n\nWeather condition is {weather_main}, {description}.")
-    print(f"\n\nWind speed: {wind_speed} m/s\nWind Direction: {wind_direction}")
-    print(f"\n\nSunrise: {sunsrise}\nSunset: {sunset}")
-    print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}\nVisibility: {visibility}")
+def print_weather(data, more=False):
+  city = data['name']
+  country = data['sys']['country']
+  temp = data['main']['temp']
+  description = data['weather'][0]['description'].capitalize()
+  weather_main = data['weather'][0]['main']
+  feels_like = data['main']['feels_like']
+  temp_min = data['main']['temp_min']
+  temp_max = data['main']['temp_max']
+  pressure = data['main']['pressure']
+  humidity = data['main']['humidity']
+  visibility = data['visibility']
+  wind_speed = data['wind']['speed']
+  wind_direction = deg_to_compass(data['wind']['deg'])
+  sunset = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
+  sunsrise = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
+  if not more:
+    print(f"Weather in {city}, {countries.get(country).name}: {temp}°C, {description}")
     return 1
-  elif 599 >= response.status_code >= 500:
-    print("Error: Server is malfunctioning!")
-  elif 499 >= response.status_code >= 400:
-    print("Error: User fault! Please check city name and api key!")
-  else:
-    print("Error: Unknown Error occurred! Please copy the api response and create " \
-          "a GitHub bug report.\nError Code: ", response.json)
-  return -1
+  print(f"Advanced Weather in {city}, {countries.get(country).name}:")
+  print(f"\n\nCurrent Temperature: {temp}°C\nFeels Like: {feels_like}°C\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C")
+  print(f"\n\nWeather condition is {weather_main}, {description}.")
+  print(f"\n\nWind speed: {wind_speed} m/s\nWind Direction: {wind_direction}")
+  print(f"\n\nSunrise: {sunsrise}\nSunset: {sunset}")
+  print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}\nVisibility: {visibility}")
+  return 1
+
+
+def get_weather(city="", more=False, data={}) -> int: 
+  if data == {}:
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    if 299 >= response.status_code >= 200:
+      data = response.json()
+      print_weather(data=data, more=more)
+    elif 599 >= response.status_code >= 500:
+      print("Error: Server is malfunctioning!")
+    elif 499 >= response.status_code >= 400:
+      print("Error: User fault! Please check city name and api key!")
+    else:
+      print("Error: Unknown Error occurred! Please copy the api response and create " \
+            "a GitHub bug report.\nError Code: ", response.json)
+    return -1
 
 
 def main():
   while True:
-    text = input(yellow("Enter the required key. Enter [H] for help: "))
-    if text.lower() == "h":
+    text = input(yellow("Enter the required key. Enter [A] for assistance: "))
+    if text.lower() == "a":
       clear()
-      print(green("Press [C] to check weather for a city.\nPress [W] to get a 5 day forecast for a city.\nPress [H] for help\nPress [E] to quit."))
+      print(green("Press [C] to check weather for a city.\nPress [W] to get a 5 day forecast for a city.\nPress [H] for search history\nEnter [A] for assistance\nPress [E] to quit."))
     elif text.lower() == "e":
       clear()
       break
@@ -170,41 +181,36 @@ def main():
       err = get_weather(city=city)
       if err > 0:
         text = input(yellow("Enter [M] for more information or [H] to go to Home."))
-        while True:
-          if text.lower() == "m":
-            clear()
-            get_weather(city=city, more=True)
-            print(yellow("Enter [H] to go to Home."))
-          elif text.lower() == "h":
-            clear()
-            break
+        if text.lower() == "m":
+          clear()
+          get_weather(city=city, more=True)
+          print(yellow("Enter [H] to go to Home."))
+        elif text.lower() == "h":
+          clear()
+        else:
+          print(red("Invalid Input! Resorting to default [H]!", "bold"))
     elif text.lower() == "w":
       clear()
       city = input("City Name: ")
-      try:
-        days = int(input("Number of days to forecast: "))
-        if days > 5:
-          print(red("Resorting to the maximum (6 days)."))
-          days = 6
-        elif days < 1:
-          print(red("Resorting to the minimum (1 day)."))
-          days = 1
-      except Exception:
-        print(red("Invalid input! Resorting to the default (5 days)."))
-        days = 5
-      err = get_future_forecast(city=city, days=days)
+      err = get_future_forecast(city=city)
       if err > 0:
         text = input(yellow("Press [M] for more information or [H] to go to Home: "))
-        while True:
-          if text.lower() == "m":
-            clear()
-            get_future_forecast(city=city, days=days, more=True)
-            break
-          elif text.lower() == "h":
-            clear()
-            time.sleep(0.5)
-            break
+        if text.lower() == "m":
+          clear()
+          get_future_forecast(city=city, more=True)
+        elif text.lower() == "h":
+          clear()
+          time.sleep(0.5)
+        else:
+          print(red("Invalid Input! Resorting to default [H]!", "bold"))
+      clear()
+    elif text.lower() == "h":
+      for i in range(len(history.keys())):
+        print(i)
+        clear()
 
 if __name__ == "__main__":
+  history = {}
+  clear()
   print(yellow("Welcome to Weather API!", ["bold", "underlined"]))
   main()
