@@ -54,24 +54,42 @@ def unix_time_to_datetime(unix_time, timezone=None):
     return datetime.fromtimestamp(unix_time)
 
 
-def clean_data(data):
-  forecast = []
-  data_output = []
-  for i in data['list']:
-      date = i['dt_txt'][:10]
-      if date not in forecast:
-        forecast.append(date)
-        data_output.append({})
-        data_output[-1]["date"] = date
-        data_output[-1]["temp"] = i['main']['temp']
-        data_output[-1]["description"] = i['weather'][0]['description'].capitalize()
-        
-        data_output[-1]["weather_main"] = i['weather'][0]['main']
-        data_output[-1]["feels_like"] = i['main']['feels_like']
-        data_output[-1]["temp_min"] = i['main']['temp_min']
-        data_output[-1]["temp_max"] = i['main']['temp_max']
-        data_output[-1]["pressure"] = i['main']['pressure']
-        data_output[-1]["humidity"] = i['main']['humidity']
+def clean_data(data, multiple_days=True):
+  if multiple_days:
+    forecast = []
+    data_output = []
+    for i in data['list']:
+        date = i['dt_txt'][:10]
+        if date not in forecast:
+          forecast.append(date)
+          data_output.append({})
+          data_output[-1]["date"] = date
+          data_output[-1]["temp"] = i['main']['temp']
+          data_output[-1]["description"] = i['weather'][0]['description'].capitalize()
+          
+          data_output[-1]["weather_main"] = i['weather'][0]['main']
+          data_output[-1]["feels_like"] = i['main']['feels_like']
+          data_output[-1]["temp_min"] = i['main']['temp_min']
+          data_output[-1]["temp_max"] = i['main']['temp_max']
+          data_output[-1]["pressure"] = i['main']['pressure']
+          data_output[-1]["humidity"] = i['main']['humidity']
+    return data_output
+  data_output = {}
+  data_output["city"] = data['name']
+  data_output["country"] = data['sys']['country']
+  data_output["temp"] = data['main']['temp']
+  data_output["description"] = data['weather'][0]['description'].capitalize()
+  data_output["weather_main"] = data['weather'][0]['main']
+  data_output["feels_like"] = data['main']['feels_like']
+  data_output["temp_min"] = data['main']['temp_min']
+  data_output["temp_max"] = data['main']['temp_max']
+  data_output["pressure"] = data['main']['pressure']
+  data_output["humidity"] = data['main']['humidity']
+  data_output["visibility"] = data['visibility']
+  data_output["wind_speed"] = data['wind']['speed']
+  data_output["wind_direction"] = deg_to_compass(data['wind']['deg'])
+  data_output["sunset"] = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
+  data_output["sunrise"] = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
   return data_output
 
 
@@ -81,7 +99,11 @@ def get_future_forecast(city: str, more=False) -> int:
   if 299 >= response.status_code >= 200:
     data = response.json()
     n_data = clean_data(data)
-    if not more: print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}: {n_data[0]['temp']}°C, {n_data[0]['description']}"); return 1
+    if not more:
+      for i in range(len(n_data)):
+        print(f"Forecast for {n_data[i]['date']}:")
+        print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}: {n_data[i]['temp']}°C, {n_data[i]['description']}\n")
+      return 1
     else: 
       print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
       j = 0
@@ -122,48 +144,47 @@ def get_future_forecast(city: str, more=False) -> int:
 
 
 def print_weather(data, more=False):
-  city = data['name']
-  country = data['sys']['country']
-  temp = data['main']['temp']
-  description = data['weather'][0]['description'].capitalize()
-  weather_main = data['weather'][0]['main']
-  feels_like = data['main']['feels_like']
-  temp_min = data['main']['temp_min']
-  temp_max = data['main']['temp_max']
-  pressure = data['main']['pressure']
-  humidity = data['main']['humidity']
+  city = data['city']
+  country = data['country']
+  temp = data['temp']
+  description = data['description'].capitalize()
+  weather_main = data['weather_main']
+  feels_like = ['feels_like']
+  temp_min = data['temp_min']
+  temp_max = data['temp_max']
+  pressure = data['pressure']
+  humidity = data['humidity']
   visibility = data['visibility']
-  wind_speed = data['wind']['speed']
-  wind_direction = deg_to_compass(data['wind']['deg'])
-  sunset = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
-  sunsrise = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
+  wind_speed = data['wind_speed']
+  wind_direction = data['wind_direction']
+  sunset = data['sunset']
+  sunsrise = data['sunrise']
   if not more:
     print(f"Weather in {city}, {countries.get(country).name}: {temp}°C, {description}")
-    return 1
+    return
   print(f"Advanced Weather in {city}, {countries.get(country).name}:")
   print(f"\n\nCurrent Temperature: {temp}°C\nFeels Like: {feels_like}°C\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C")
   print(f"\n\nWeather condition is {weather_main}, {description}.")
   print(f"\n\nWind speed: {wind_speed} m/s\nWind Direction: {wind_direction}")
   print(f"\n\nSunrise: {sunsrise}\nSunset: {sunset}")
   print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}\nVisibility: {visibility}")
-  return 1
 
 
-def get_weather(city="", more=False, data={}) -> int: 
-  if data == {}:
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-    response = requests.get(url)
-    if 299 >= response.status_code >= 200:
-      data = response.json()
-      print_weather(data=data, more=more)
-    elif 599 >= response.status_code >= 500:
-      print("Error: Server is malfunctioning!")
-    elif 499 >= response.status_code >= 400:
-      print("Error: User fault! Please check city name and api key!")
-    else:
-      print("Error: Unknown Error occurred! Please copy the api response and create " \
-            "a GitHub bug report.\nError Code: ", response.json)
-    return -1
+def get_weather(city, more=False) -> int: 
+  url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+  response = requests.get(url)
+  if 299 >= response.status_code >= 200:
+    data = clean_data(response.json(), multiple_days=False)
+    print_weather(data=data, more=more)
+    return 1
+  elif 599 >= response.status_code >= 500:
+    print("Error: Server is malfunctioning!")
+  elif 499 >= response.status_code >= 400:
+    print("Error: User fault! Please check city name and api key!")
+  else:
+    print("Error: Unknown Error occurred! Please copy the api response and create " \
+         "a GitHub bug report.\nError Code: ", response.json)
+  return -1
 
 
 def main():
@@ -180,11 +201,10 @@ def main():
       city = input("City Name: ")
       err = get_weather(city=city)
       if err > 0:
-        text = input(yellow("Enter [M] for more information or [H] to go to Home."))
+        text = input(yellow("Enter [M] for more information or [H] to go to Home: "))
         if text.lower() == "m":
           clear()
           get_weather(city=city, more=True)
-          print(yellow("Enter [H] to go to Home."))
         elif text.lower() == "h":
           clear()
         else:
@@ -208,6 +228,7 @@ def main():
       for i in range(len(history.keys())):
         print(i)
         clear()
+
 
 if __name__ == "__main__":
   history = {}
