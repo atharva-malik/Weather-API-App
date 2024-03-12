@@ -6,7 +6,9 @@ api_key = "ede8ff9e889a72caabf0bcec094eb623"
 
 
 def save_to_history(query: str, data: dict):
-  pass
+  global history, number_of_queries
+  number_of_queries += 1
+  history[str(number_of_queries) + ". " + query] = data
 
 
 def clear():
@@ -54,7 +56,7 @@ def unix_time_to_datetime(unix_time, timezone=None):
     return datetime.fromtimestamp(unix_time)
 
 
-def clean_data(data, multiple_days=True):
+def clean_data(data, query: str, multiple_days=True):
   if multiple_days:
     forecast = []
     data_output = []
@@ -63,6 +65,8 @@ def clean_data(data, multiple_days=True):
         if date not in forecast:
           forecast.append(date)
           data_output.append({})
+          data_output[-1]["city"] = data['city']['name']
+          data_output[-1]["country"] = data['city']['country']
           data_output[-1]["date"] = date
           data_output[-1]["temp"] = i['main']['temp']
           data_output[-1]["description"] = i['weather'][0]['description'].capitalize()
@@ -73,6 +77,7 @@ def clean_data(data, multiple_days=True):
           data_output[-1]["temp_max"] = i['main']['temp_max']
           data_output[-1]["pressure"] = i['main']['pressure']
           data_output[-1]["humidity"] = i['main']['humidity']
+    save_to_history(query=query, data=data_output)
     return data_output
   data_output = {}
   data_output["city"] = data['name']
@@ -90,6 +95,7 @@ def clean_data(data, multiple_days=True):
   data_output["wind_direction"] = deg_to_compass(data['wind']['deg'])
   data_output["sunset"] = unix_time_to_datetime(data['sys']['sunset'], timezone=pytz.timezone("Australia/Sydney"))
   data_output["sunrise"] = unix_time_to_datetime(data['sys']['sunrise'], timezone=pytz.timezone("Australia/Sydney"))
+  save_to_history(query=query, data=data_output)
   return data_output
 
 
@@ -98,7 +104,7 @@ def get_future_forecast(city: str, more=False) -> int:
   response = requests.get(url)
   if 299 >= response.status_code >= 200:
     data = response.json()
-    n_data = clean_data(data)
+    n_data = clean_data(data, query=city)
     if not more:
       for i in range(len(n_data)):
         print(f"Forecast for {n_data[i]['date']}:")
@@ -149,19 +155,26 @@ def print_weather(data, more=False):
   temp = data['temp']
   description = data['description'].capitalize()
   weather_main = data['weather_main']
-  feels_like = ['feels_like']
+  feels_like = data['feels_like']
   temp_min = data['temp_min']
   temp_max = data['temp_max']
   pressure = data['pressure']
   humidity = data['humidity']
-  visibility = data['visibility']
-  wind_speed = data['wind_speed']
-  wind_direction = data['wind_direction']
-  sunset = data['sunset']
-  sunsrise = data['sunrise']
+  try:
+    visibility = data['visibility']
+    wind_speed = data['wind_speed']
+    wind_direction = data['wind_direction']
+    sunset = data['sunset']
+    sunsrise = data['sunrise']
+  except KeyError:
+    visibility = "Not Available"
+    wind_speed = "Not Available"
+    wind_direction = "Not Available"
+    sunset = "Not Available"
+    sunsrise = "Not Available"
   if not more:
-    print(f"Weather in {city}, {countries.get(country).name}: {temp}°C, {description}")
-    return
+      print(f"Weather in {city}, {countries.get(country).name}: {temp}°C, {description}")
+      return
   print(f"Advanced Weather in {city}, {countries.get(country).name}:")
   print(f"\n\nCurrent Temperature: {temp}°C\nFeels Like: {feels_like}°C\nMax Temperature: {temp_max}°C\nMin Temperature: {temp_min}°C")
   print(f"\n\nWeather condition is {weather_main}, {description}.")
@@ -174,7 +187,7 @@ def get_weather(city, more=False) -> int:
   url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
   response = requests.get(url)
   if 299 >= response.status_code >= 200:
-    data = clean_data(response.json(), multiple_days=False)
+    data = clean_data(response.json(), query=city, multiple_days=False)
     print_weather(data=data, more=more)
     return 1
   elif 599 >= response.status_code >= 500:
@@ -192,7 +205,7 @@ def main():
     text = input(yellow("Enter the required key. Enter [A] for assistance: "))
     if text.lower() == "a":
       clear()
-      print(green("Press [C] to check weather for a city.\nPress [W] to get a 5 day forecast for a city.\nPress [H] for search history\nEnter [A] for assistance\nPress [E] to quit."))
+      print(green("Press [C] to check weather for a city.\nPress [W] to get a 6 day forecast for a city.\nPress [H] for search history\nEnter [A] for assistance\nPress [E] to quit."))
     elif text.lower() == "e":
       clear()
       break
@@ -225,13 +238,22 @@ def main():
           print(red("Invalid Input! Resorting to default [H]!", "bold"))
       clear()
     elif text.lower() == "h":
-      for i in range(len(history.keys())):
-        print(i)
-        clear()
+      for i in history.keys():
+        print(cyan(i , "bold"))
+        if type(history[i]) == list:
+          for j in (history[i]):
+            print(cyan(j['date']))
+            print_weather(j, more=True)
+            print("\n")
+        elif type(history[i]) == dict:
+          print_weather(history[i], more=True)
+        print("\n\n")
+        #clear()
 
 
 if __name__ == "__main__":
   history = {}
+  number_of_queries = 0
   clear()
   print(yellow("Welcome to Weather API!", ["bold", "underlined"]))
   main()
