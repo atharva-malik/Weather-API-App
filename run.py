@@ -4,6 +4,28 @@ import requests, time, pytz; from iso3166 import countries; from datetime import
 api_key = "ede8ff9e889a72caabf0bcec094eb623"
 #endregion
 
+"""
+c
+Lahore
+h
+c
+Ambala
+h
+c
+Angola
+h
+w
+Moscow
+h
+c
+Moscow
+h
+w
+Pyongyang
+h
+h
+"""
+
 
 def save_to_history(query: str, data: dict):
   global history, number_of_queries
