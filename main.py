@@ -1,30 +1,7 @@
 import requests, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
 
-#region
-api_key = "ede8ff9e889a72caabf0bcec094eb623"
-#endregion
 
-"""
-c
-Lahore
-h
-c
-Ambala
-h
-c
-Angola
-h
-w
-Moscow
-h
-c
-Moscow
-h
-w
-Pyongyang
-h
-h
-"""
+api_key = "ede8ff9e889a72caabf0bcec094eb623"
 
 
 def save_to_history(query: str, data: dict):
@@ -140,7 +117,7 @@ def get_future_forecast(city: str, more=False) -> int:
         print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
         print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
         print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
-        text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: ")
+        text = input(yellow("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
         if text.lower() == "n":
           clear()
           if j == len(n_data) - 1:
