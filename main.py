@@ -1,4 +1,4 @@
-import requests, time, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
+import requests, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
 
 #region
 api_key = "ede8ff9e889a72caabf0bcec094eb623"
@@ -136,38 +136,33 @@ def get_future_forecast(city: str, more=False) -> int:
       print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
       j = 0
       while True:
-        if j < 0:
-          break
         print(f"Forecast for {n_data[j]['date']}:")
         print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
         print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
         print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
         text = input("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: ")
         if text.lower() == "n":
-          time.sleep(0.5)
           clear()
           if j == len(n_data) - 1:
             j = 0
           else:
             j += 1
         elif text.lower() == "b":
-          time.sleep(0.5)
           clear()
           if j == 0:
             j = len(n_data) - 1
           else:
             j -= 1
         else:
-          j = -1
           return 1
-    return 1
+
   elif 599 >= response.status_code >= 500:
-    print("Error: Server is malfunctioning!")
+    print(red("Error: Server is malfunctioning!"), "bold")
   elif 499 >= response.status_code >= 400:
-    print("Error: User fault! Please check city name and api key!")
+    print(red("Error: User fault! Please check city name and api key!", "bold"))
   else:
-    print("Error: Unknown Error occurred! Please copy the api response and create " \
-          "a GitHub bug report.\nError Code: ", response.json)
+    print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
+          "a GitHub bug report.\nError Code: ", response.json), "bold"))
   return -1
 
 
@@ -213,12 +208,12 @@ def get_weather(city, more=False) -> int:
     print_weather(data=data, more=more)
     return 1
   elif 599 >= response.status_code >= 500:
-    print("Error: Server is malfunctioning!")
+    print(red("Error: Server is malfunctioning!", "bold"))
   elif 499 >= response.status_code >= 400:
-    print("Error: User fault! Please check city name and api key!")
+    print(red("Error: User fault! Please check city name and api key!", "bold"))
   else:
-    print("Error: Unknown Error occurred! Please copy the api response and create " \
-         "a GitHub bug report.\nError Code: ", response.json)
+    print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
+         "a GitHub bug report.\nError Code: ", response.json), "bold"))
   return -1
 
 
@@ -227,7 +222,7 @@ def main():
     text = input(yellow("Enter the required key. Enter [A] for assistance: "))
     if text.lower() == "a":
       clear()
-      print(green("Press [C] to check weather for a city.\nPress [W] to get a 6 day forecast for a city.\nPress [H] for search history\nEnter [A] for assistance\nPress [E] to quit."))
+      print(green("Enter [C] to check weather for a city.\nEnter [W] to get a 6 day forecast for a city.\nEnter [H] for search history\nEnter [A] for assistance\nEnter [E] to quit."))
     elif text.lower() == "e":
       clear()
       break
@@ -249,28 +244,47 @@ def main():
       city = input("City Name: ")
       err = get_future_forecast(city=city)
       if err > 0:
-        text = input(yellow("Press [M] for more information or [H] to go to Home: "))
+        text = input(yellow("Enter [M] for more information or [H] to go to Home: "))
         if text.lower() == "m":
           clear()
           get_future_forecast(city=city, more=True)
         elif text.lower() == "h":
           clear()
-          time.sleep(0.5)
         else:
           print(red("Invalid Input! Resorting to default [H]!", "bold"))
-      clear()
     elif text.lower() == "h":
-      for i in history.keys():
-        print(cyan(i , "bold"))
-        if type(history[i]) == list:
-          for j in (history[i]):
-            print(cyan(j['date']))
-            print_weather(j, more=True)
-            print("\n")
-        elif type(history[i]) == dict:
-          print_weather(history[i], more=True)
-        print("\n\n")
-        #clear()
+      if history.keys():
+        clear()
+        j = 0
+        while True:
+          i = list(history.keys())[j]
+          print(cyan(i , "bold"))
+          if type(history[i]) == list:
+            for k in (history[i]):
+              print(cyan(k['date']))
+              print_weather(k, more=True)
+              print("\n")
+          elif type(history[i]) == dict:
+            print_weather(history[i], more=True)
+          print("\n\n")
+          text = input(yellow("Enter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
+          if text.lower() == "n":
+            clear()
+            if j == len(history.keys()) - 1:
+              j = 0
+            else:
+              j += 1
+          elif text.lower() == "b":
+            clear()
+            if j == 0:
+              j = len(history.keys()) - 1
+            else:
+              j -= 1
+          else:
+            break
+      else:
+        clear()
+        print(red("Nothing to show!"))
 
 
 if __name__ == "__main__":
