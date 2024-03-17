@@ -5,12 +5,28 @@ api_key = "ede8ff9e889a72caabf0bcec094eb623"
 
 
 def save_to_history(query: str, data: dict):
+  """
+  Updates the global history dictionary by incrementing the number of queries 
+  and adding the query string and data to the dictionary.
+  
+  Args:
+    query (str): The user query string
+    data (dict): The data associated with the query
+  """
+
   global history, number_of_queries
   number_of_queries += 1
   history[str(number_of_queries) + ". " + query] = data
 
 
 def clear():
+  """
+  Clears the terminal screen.
+  Checks the current operating system and calls the appropriate 
+  system command to clear the terminal screen - 'cls' for Windows
+  or 'clear' for Linux/macOS.
+  """
+
   # for windows
   if name == 'nt':
     _ = system('cls')
@@ -21,8 +37,15 @@ def clear():
 
 def deg_to_compass(degrees):
   """
-  Converts degrees (0-360) to cardinal and intercardinal wind directions.
-
+  Validates that input degrees are between 0 and 360, then maps 
+  the degrees to a compass direction by indexing into a lookup
+  table of directions.
+  
+  Args:
+    degrees: The degrees to map to a compass direction
+  
+  Returns:
+    A string representing the compass direction
   """
 
   # Validate input
@@ -56,6 +79,24 @@ def unix_time_to_datetime(unix_time, timezone=None):
 
 
 def clean_data(data, query: str, multiple_days=True):
+  """
+  Processes weather data from the OpenWeatherMap API into a more convenient format.
+  
+  If multiple_days is True, retrieves forecast data for multiple days and returns a list of dictionaries containing the processed daily weather data. 
+  
+  If multiple_days is False, retrieves current weather data and returns a dictionary containing the processed current weather data.
+  
+  Saves the processed weather data to the query history.
+  
+  Args:
+    data: A dictionary containing the raw weather data from the OpenWeatherMap API.
+    query: The city that the data is associated with.
+    multiple_days: Whether the output needs to be a list or dict
+    
+  Returns:
+    A list of dictionaries containing the processed daily weather data if multiple_days is True, otherwise a dictionary containing the processed current weather data.
+  """
+  
   if multiple_days:
     forecast = []
     data_output = []
@@ -99,6 +140,22 @@ def clean_data(data, query: str, multiple_days=True):
 
 
 def get_future_forecast(city: str, more=False) -> int:
+  """
+  Makes an API request to the OpenWeatherMap API to get a 6 day weather data for the given city. 
+  
+  Handles API response codes to detect errors or lack of internet connectivity.
+  Prints appropriate error messages on failure.
+  
+  On success, calls clean_data() to parse API response, print_weather() 
+  to print weather info, and returns 1.
+
+  Args:
+    city: Name of city to get forecast for
+    more: Whether to show advanced forecast details 
+  
+  Returns:
+    int: 1 for success, -1 for error
+  """
   try:
     url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
     response = requests.get(url)
@@ -146,6 +203,13 @@ def get_future_forecast(city: str, more=False) -> int:
 
 
 def print_weather(data, more=False):
+  """
+  Parses weather data from API response into readable format.
+  
+  Args:
+    data: Cleaned weather API response data
+    more: Whether to print advanced information
+  """
   city = data['city']
   country = data['country']
   temp = data['temp']
@@ -180,6 +244,22 @@ def print_weather(data, more=False):
 
 
 def get_weather(city, more=False) -> int:
+  """
+  Makes an API request to the OpenWeatherMap API to get weather data for the given city. 
+  
+  Handles API response codes to detect errors or lack of internet connectivity.
+  Prints appropriate error messages on failure.
+  
+  On success, calls clean_data() to parse API response, print_weather() 
+  to print weather info, and returns 1.
+  
+  Args:
+    city: Name of city to get weather for
+    more: Whether to print more detailed weather info
+    
+  Returns:
+    int: 1 for success, -1 for failure
+  """
   try:
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     response = requests.get(url)
@@ -200,6 +280,16 @@ def get_weather(city, more=False) -> int:
 
 
 def main():
+  """
+  Provides an interactive command line interface for getting weather data.
+  
+  Allows the user to:
+  - Get current weather for a city
+  - Get a 6 day weather forecast for a city  
+  - View previous search history
+  - Get help/assistance
+  
+  """
   while True:
     text = input(yellow("Enter the required key. Enter [A] for assistance: "))
     if text.lower() == "a":
@@ -270,6 +360,13 @@ def main():
 
 
 if __name__ == "__main__":
+  """
+  Initializes global variables to track state and prints a welcome message.
+  
+  history: Dictionary to store query history
+  number_of_queries: Counter for number of queries made
+  Prints welcome message and calls main() function.
+  """
   history = {}
   number_of_queries = 0
   clear()
