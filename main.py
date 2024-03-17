@@ -99,47 +99,49 @@ def clean_data(data, query: str, multiple_days=True):
 
 
 def get_future_forecast(city: str, more=False) -> int:
-  url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
-  response = requests.get(url)
-  if 299 >= response.status_code >= 200:
-    data = response.json()
-    n_data = clean_data(data, query=city)
-    if not more:
-      for i in range(len(n_data)):
-        print(f"Forecast for {n_data[i]['date']}:")
-        print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}: {n_data[i]['temp']}°C, {n_data[i]['description']}\n")
-      return 1
-    else: 
-      print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
-      j = 0
-      while True:
-        print(f"Forecast for {n_data[j]['date']}:")
-        print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
-        print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
-        print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
-        text = input(yellow("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
-        if text.lower() == "n":
-          clear()
-          if j == len(n_data) - 1:
-            j = 0
+  try:
+    url = f"https://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    if 299 >= response.status_code >= 200:
+      data = response.json()
+      n_data = clean_data(data, query=city)
+      if not more:
+        for i in range(len(n_data)):
+          print(f"Forecast for {n_data[i]['date']}:")
+          print(f"{data['city']['name']}, {countries.get(data['city']['country']).name}: {n_data[i]['temp']}°C, {n_data[i]['description']}\n")
+        return 1
+      else: 
+        print(f"Advanced Weather in {data['city']['name']}, {countries.get(data['city']['country']).name}:")
+        j = 0
+        while True:
+          print(f"Forecast for {n_data[j]['date']}:")
+          print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
+          print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
+          print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
+          text = input(yellow("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
+          if text.lower() == "n":
+            clear()
+            if j == len(n_data) - 1:
+              j = 0
+            else:
+              j += 1
+          elif text.lower() == "b":
+            clear()
+            if j == 0:
+              j = len(n_data) - 1
+            else:
+              j -= 1
           else:
-            j += 1
-        elif text.lower() == "b":
-          clear()
-          if j == 0:
-            j = len(n_data) - 1
-          else:
-            j -= 1
-        else:
-          return 1
-
-  elif 599 >= response.status_code >= 500:
-    print(red("Error: Server is malfunctioning!"), "bold")
-  elif 499 >= response.status_code >= 400:
-    print(red("Error: User fault! Please check city name and api key!", "bold"))
-  else:
-    print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
-          "a GitHub bug report.\nError Code: ", response.json), "bold"))
+            return 1
+    elif 599 >= response.status_code >= 500:
+      print(red("Error: Server is malfunctioning!"), "bold")
+    elif 499 >= response.status_code >= 400:
+      print(red("Error: User fault! Please check city name and api key!", "bold"))
+    else:
+      print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
+            "a GitHub bug report.\nError Code: ", response.json), "bold"))
+  except Exception:
+    print(red("Error: No Internet Connection!"), "bold")
   return -1
 
 
@@ -177,20 +179,23 @@ def print_weather(data, more=False):
   print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}\nVisibility: {visibility}")
 
 
-def get_weather(city, more=False) -> int: 
-  url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-  response = requests.get(url)
-  if 299 >= response.status_code >= 200:
-    data = clean_data(response.json(), query=city, multiple_days=False)
-    print_weather(data=data, more=more)
-    return 1
-  elif 599 >= response.status_code >= 500:
-    print(red("Error: Server is malfunctioning!", "bold"))
-  elif 499 >= response.status_code >= 400:
-    print(red("Error: User fault! Please check city name and api key!", "bold"))
-  else:
-    print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
-         "a GitHub bug report.\nError Code: ", response.json), "bold"))
+def get_weather(city, more=False) -> int:
+  try:
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    response = requests.get(url)
+    if 299 >= response.status_code >= 200:
+      data = clean_data(response.json(), query=city, multiple_days=False)
+      print_weather(data=data, more=more)
+      return 1
+    elif 599 >= response.status_code >= 500:
+      print(red("Error: Server is malfunctioning!", "bold"))
+    elif 499 >= response.status_code >= 400:
+      print(red("Error: User fault! Please check city name and api key!", "bold"))
+    else:
+      print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
+          "a GitHub bug report.\nError Code: ", response.json), "bold"))
+  except Exception:
+    print(red("Error: No Internet Connection!"), "bold")
   return -1
 
 
