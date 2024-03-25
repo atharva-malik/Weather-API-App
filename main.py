@@ -329,6 +329,7 @@ def main():
         clear()
         j = 0
         while True:
+          clear()
           i = list(history.keys())[j]
           print(cyan(i , "bold"))
           if type(history[i]) == list:
@@ -341,13 +342,11 @@ def main():
           print("\n\n")
           text = input(yellow("Enter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
           if text.lower() == "n":
-            clear()
             if j == len(history.keys()) - 1:
               j = 0
             else:
               j += 1
           elif text.lower() == "b":
-            clear()
             if j == 0:
               j = len(history.keys()) - 1
             else:
