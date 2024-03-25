@@ -1,7 +1,13 @@
-import requests, pytz; from iso3166 import countries; from datetime import datetime; from simple_colors import *; from os import system, name
+import requests #* To request the weather data from OpenWeatherMap
+import pytz #* To convert the time zone to AEST
+from iso3166 import countries #* To get country name from country code
+from datetime import datetime #* To convert Unix timestamp to datetime object
+from simple_colors import * #* To add colour to the terminal
+from os import system, name #* To clear the screen
 
 
-api_key = "ede8ff9e889a72caabf0bcec094eb623"
+#! ENTER YOUR API KEY HERE:
+api_key = ""
 
 
 def save_to_history(query: str, data: dict):
