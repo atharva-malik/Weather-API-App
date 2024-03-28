@@ -33,10 +33,10 @@ def clear():
   or 'clear' for Linux/macOS.
   """
 
-  # for windows
+  #* for windows
   if name == 'nt':
     _ = system('cls')
-  # for mac and linux(here, os.name is 'posix')
+  #* for mac and linux(here, os.name is 'posix')
   else:
     _ = system('clear')
 
@@ -281,7 +281,7 @@ def get_weather(city, more=False) -> int:
       print(red(("Error: Unknown Error occurred! Please copy the api response and create " \
           "a GitHub bug report.\nError Code: ", response.json), "bold"))
   except Exception:
-    print(red("Error: No Internet Connection!"), "bold")
+    print(red("Error: No Internet Connection!", "bold"))
   return -1
 
 
