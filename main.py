@@ -180,7 +180,7 @@ def get_future_forecast(city: str, more=False) -> int:
           print(f"Forecast for {n_data[j]['date']}:")
           print(f"\n\nMax Temperature: {n_data[j]['temp_max']}°C\nMin Temperature: {n_data[j]['temp_min']}°C\nFeels Like: {n_data[j]['feels_like']}°C")
           print(f"\n\nWeather condition is {n_data[j]['weather_main']}, {n_data[j]['description']}.")
-          print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']}\nHumidity: {n_data[j]['humidity']}")
+          print(f"\n\nOther weather information:\nPressure: {n_data[j]['pressure']} psi\nHumidity: {n_data[j]['humidity']}%")
           text = input(yellow("\n\nEnter [N] to go to the next date or [B] to go to the previous date or anything else to go back: "))
           if text.lower() == "n":
             clear()
@@ -246,7 +246,7 @@ def print_weather(data, more=False):
   print(f"\n\nWeather condition is {weather_main}, {description}.")
   print(f"\n\nWind speed: {wind_speed} m/s\nWind Direction: {wind_direction}")
   print(f"\n\nSunrise: {sunsrise}\nSunset: {sunset}")
-  print(f"\n\nOther weather information:\nPressure: {pressure}\nHumidity: {humidity}\nVisibility: {visibility}")
+  print(f"\n\nOther weather information:\nPressure: {pressure} psi\nHumidity: {humidity}%\nVisibility: {visibility} m")
 
 
 def get_weather(city, more=False) -> int:
