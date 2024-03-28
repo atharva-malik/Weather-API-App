@@ -21,7 +21,7 @@ This console application uses 2 main technologies on the front end, [Python 3.11
 
 Install the repository and the following packages and you are good to go!
 ```sh
-pip install -r .\requirements.txt
+pip3 install -r .\requirements.txt
 ```
 
 ## Execution
