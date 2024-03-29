@@ -7,7 +7,7 @@ from os import system, name #* To clear the screen
 
 
 #! ENTER YOUR API KEY HERE:
-api_key = ""
+api_key = "ede8ff9e889a72caabf0bcec094eb623"
 
 
 def save_to_history(query: str, data: dict):
@@ -275,12 +275,7 @@ def get_weather(city, more=False) -> int:
   if more: #* We can just access history and use the data stored there instead of creating a new api request
     global history
     data = history[list(history.keys())[-1]]
-    print(f"Advanced Weather in {data['city']}, {countries.get(data['country']).name}:")
-    print(f"\n\nCurrent Temperature: {data['temp']}°C\nFeels Like: {data['feels_like']}°C\nMax Temperature: {data['temp_max']}°C\nMin Temperature: {data['temp_min']}°C")
-    print(f"\n\nWeather condition is {data['weather_main']}, {data['description'].capitalize()}.")
-    print(f"\n\nWind speed: {data['wind_speed']} m/s\nWind Direction: {data['wind_direction']}")
-    print(f"\n\nSunrise: {data['sunrise']}\nSunset: {data['sunset']}")
-    print(f"\n\nOther weather information:\nPressure: {data['pressure']} psi\nHumidity: {data['humidity']}%\nVisibility: {data['visibility']} m")
+    print_weather(data=data, more=more)
     return 1
   try: #* Check if internet connection is available
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
