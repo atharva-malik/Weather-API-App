@@ -1,4 +1,4 @@
-# Year 10 Assessment Task 1
+# Weather API App
 
 This is a simple implementation of [OpenWeatherMap's] free weather api. It comes with a variety of features like, CLI interface, advanced or simple weather forecasts, multiple day forecast, search history, intuitive and clean interface, etcetera. It is fully functional and extremely easy to use!
 
