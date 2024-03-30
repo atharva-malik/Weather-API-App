@@ -13,7 +13,7 @@ This is a simple implementation of [OpenWeatherMap's] free weather api. It comes
 - Search history
 - Advanced/Simple weather forecast
 
-## Technologies Used (CLI)
+## Technologies Used
 
 This console application uses 2 main technologies on the front end, [Python 3.11] and the [simple-colors] module, but uses lots of different technologies in the background like the iso3166 module (to convert the default api country codes to a more readable form) and Pytz (to help convert time to different time zones)
 
