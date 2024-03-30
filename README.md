@@ -37,7 +37,7 @@ Then enter "A" to reach the Assistance Menu, allowing you to see the different c
 Want to contribute? Great! Pull requests and issues are welcome! [Here] is an excellent guide on how to create pull requests and forks to request changes. I suggest using the addon "Better Comments" on Visual Studio Code as it makes the comments more readable. If you can not use the addon, I have used the following tags to make the comments more readable:
 
 - #!: This is a warning
-- #*: This is used for in-line comments
+- #*: This is used mainly for in-line comments
 - """
 
   """ This is a docstring, explaining the functions' use, arguments, and returns, if any.
