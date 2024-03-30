@@ -7,7 +7,7 @@ from os import system, name #* To clear the screen
 
 
 #! ENTER YOUR API KEY HERE:
-api_key = "ede8ff9e889a72caabf0bcec094eb623"
+api_key = ""
 
 
 def save_to_history(query: str, data: dict):
